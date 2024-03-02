@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 $stations = [];
 
-$c = 0;
+// $c = 0;
 
 $input = __DIR__.'/measurements.txt';
 // $input = __DIR__ . "/top1000000.txt";
@@ -25,7 +25,7 @@ $pos = 0;
 while (!feof($f)) {
     fseek($f, $pos);
 
-    $data = fread($f, 1048576);
+    $data = fread($f, 5242880);
 
     $last_pos = strrpos($data, "\n");
 
@@ -64,11 +64,11 @@ while (!feof($f)) {
             $stations[$name]['max'] = $temperature;
         }
 
-        ++$c;
+        // ++$c;
 
-        if ($c % 10_000_000 === 0) {
-            echo $c . PHP_EOL;
-        }
+        // if ($c % 10_000_000 === 0) {
+        //     echo $c . PHP_EOL;
+        // }
     }
 
     $pos += $last_pos;
@@ -76,17 +76,13 @@ while (!feof($f)) {
 
 fclose($f);
 
-$fout = __DIR__ . '/output.txt';
-
 // sort by station name
 ksort($stations);
-
-$last = array_key_last($stations);
 
 $station_count = 0;
 $output = '{';
 
-$o = fopen($fout, 'a');
+$o = fopen(__DIR__ . '/output.txt', 'a');
 
 foreach ($stations as $name => $data) {
     $output .=
@@ -94,13 +90,13 @@ foreach ($stations as $name => $data) {
         '=' .
         $data['min'] .
         '/' .
-        number_format($data['total'] / $data['count'], 1) .
+        sprintf('%.1f', $data['total'] / $data['count']) .
         '/' .
         $data['max'] . ', ';
 
     ++$station_count;
 
-    if ($station_count >= 1000) {
+    if ($station_count >= 2000) {
         fwrite($o, $output);
         $output = '';
         $station_count = 0;
