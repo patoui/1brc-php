@@ -74,7 +74,9 @@ while (!feof($f)) {
     $pos += $last_pos;
 }
 
-$filename = __DIR__ . '/output.txt';
+fclose($f);
+
+$fout = __DIR__ . '/output.txt';
 
 // sort by station name
 ksort($stations);
@@ -83,6 +85,8 @@ $last = array_key_last($stations);
 
 $station_count = 0;
 $output = '{';
+
+$o = fopen($fout, 'a');
 
 foreach ($stations as $name => $data) {
     $output .=
@@ -98,14 +102,14 @@ foreach ($stations as $name => $data) {
     ++$station_count;
 
     if ($station_count >= 1000) {
-        file_put_contents($filename, $output, FILE_APPEND);
+        fwrite($o, $output);
         $output = '';
         $station_count = 0;
     }
 }
 
 if ($station_count > 0) {
-    file_put_contents($filename, $output, FILE_APPEND);
+    fwrite($o, $output.'}');
+} else {
+    fwrite($o, '}');
 }
-
-file_put_contents($filename, '}', FILE_APPEND);
