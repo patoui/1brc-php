@@ -29,7 +29,9 @@ function lines($file): Generator
 
 $c = 0;
 
-foreach (lines(__DIR__.'/measurements.txt') as $measurement) {
+$input = __DIR__.'/measurements.txt';
+// $input = __DIR__.'/top1000.txt';
+foreach (lines($input) as $measurement) {
     [$name, $temperature] = explode(';', trim($measurement));
 
     if (!isset($stations[$name])) {
@@ -69,18 +71,27 @@ ksort($stations);
 
 $last = array_key_last($stations);
 
+$station_count = 0;
+$output = '';
+
 foreach ($stations as $name => $data) {
-    file_put_contents(
-        $filename,
-        sprintf(
-            "%s=%.1f/%.1f/%.1f" . ($name === $last ? '' : ','),
-            $name,
-            $data['min'],
-            $data['total'] / $data['count'],
-            $data['max']
-        ),
-        FILE_APPEND
-    );
+    $output .= $name . '='
+        . $data['min']
+        . '/' . number_format($data['total'] / $data['count'], 1)
+        . '/' . $data['max']
+        . ($name === $last ? '' : ', ');
+
+    ++$station_count;
+
+    if ($station_count >= 1000) {
+        file_put_contents($filename, $output, FILE_APPEND);
+        $output = '';
+        $station_count = 0;
+    }
+}
+
+if ($station_count > 0) {
+    file_put_contents($filename, $output, FILE_APPEND);
 }
 
 file_put_contents($filename, '}', FILE_APPEND);
