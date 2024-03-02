@@ -103,6 +103,4 @@ foreach ($stations as $name => $data) {
     }
 }
 
-if ($station_count > 0) {
-    fwrite($o, rtrim($output, ', ') . '}');
-}
+fwrite($o, rtrim($output, ', ') . '}');
