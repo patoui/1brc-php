@@ -96,8 +96,7 @@ foreach ($stations as $name => $data) {
         '/' .
         number_format($data['total'] / $data['count'], 1) .
         '/' .
-        $data['max'] .
-        ($name === $last ? '' : ', ');
+        $data['max'] . ', ';
 
     ++$station_count;
 
@@ -109,7 +108,5 @@ foreach ($stations as $name => $data) {
 }
 
 if ($station_count > 0) {
-    fwrite($o, $output.'}');
-} else {
-    fwrite($o, '}');
+    fwrite($o, rtrim($output, ', ') . '}');
 }
