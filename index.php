@@ -17,9 +17,8 @@ $stations = [];
 function lines($file): Generator
 {
     $f = fopen($file, 'r');
-
     try {
-        while ($line = fgets($f)) {
+        while ($line = fscanf($f, '%[^;];%f')) {
             yield $line;
         }
     } finally {
@@ -30,9 +29,9 @@ function lines($file): Generator
 $c = 0;
 
 $input = __DIR__.'/measurements.txt';
-// $input = __DIR__.'/top1000.txt';
+// $input = __DIR__.'/top1000000.txt';
 foreach (lines($input) as $measurement) {
-    [$name, $temperature] = explode(';', trim($measurement));
+    [$name, $temperature] = $measurement;
 
     if (!isset($stations[$name])) {
         $stations[$name] = [
