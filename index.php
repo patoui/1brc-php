@@ -16,7 +16,7 @@ $stations = [];
 
 // $c = 0;
 
-$input = __DIR__.'/measurements.txt';
+$input = __DIR__ . '/measurements.txt';
 // $input = __DIR__ . "/top1000000.txt";
 
 $f = fopen($input, 'r');
@@ -79,10 +79,7 @@ fclose($f);
 // sort by station name
 ksort($stations);
 
-$station_count = 0;
 $output = '{';
-
-$o = fopen(__DIR__ . '/output.txt', 'a');
 
 foreach ($stations as $name => $data) {
     $output .=
@@ -93,14 +90,6 @@ foreach ($stations as $name => $data) {
         sprintf('%.1f', $data['total'] / $data['count']) .
         '/' .
         $data['max'] . ', ';
-
-    ++$station_count;
-
-    if ($station_count >= 2000) {
-        fwrite($o, $output);
-        $output = '';
-        $station_count = 0;
-    }
 }
 
-fwrite($o, rtrim($output, ', ') . '}');
+echo rtrim($output, ', ') . '}';

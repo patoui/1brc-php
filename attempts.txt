@@ -4,3 +4,4 @@ php index.php  297.47s user 3.15s system 99% cpu 5:02.37 total
 php index.php  215.36s user 5.17s system 99% cpu 3:42.45 total
 php index.php  207.44s user 4.96s system 99% cpu 3:34.09 total
 php index.php  206.08s user 4.78s system 99% cpu 3:31.99 total
+php index.php  201.52s user 6.82s system 99% cpu 3:29.03 total
