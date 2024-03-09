@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/vendor/autoload.php';
+
+use function Amp\async;
+
 /**
- * Format:
+ * Station format:
  * key = station name
  * value = [
  *     'count' => 111,
@@ -12,28 +16,14 @@ declare(strict_types=1);
  *     'max' => 321,
  * ]
  */
-$stations = [];
-
-// $c = 0;
 
 $input = __DIR__ . '/measurements.txt';
 // $input = __DIR__ . "/top1000000.txt";
+// $input = __DIR__ . "/top1000.txt";
 
-$f = fopen($input, 'r');
-$pos = 0;
-
-while (!feof($f)) {
-    fseek($f, $pos);
-
-    $data = fread($f, 5242880);
-
-    $last_pos = strrpos($data, "\n");
-
-    if ($last_pos === false) {
-        $last_pos = strlen($data);
-    }
-
-    $parsed = preg_split('/[\n;]/', substr($data, 0, $last_pos));
+$process_chunk = static function ($chunk) {
+    $stations = [];
+    $parsed = preg_split('/[\n;]/', $chunk);
     for ($i = 0; $i < count($parsed); $i += 2) {
         if ($parsed[$i] === '') {
             ++$i;
@@ -64,13 +54,53 @@ while (!feof($f)) {
         if ($temperature > $station['max']) {
             $station['max'] = $temperature;
         }
-
-        // ++$c;
-
-        // if ($c % 10_000_000 === 0) {
-        //     echo $c . PHP_EOL;
-        // }
     }
+
+    return $stations;
+};
+
+$futures = [];
+
+$f = fopen($input, 'r');
+$pos = 0;
+$limit = 750;
+$stations = [];
+
+while (!feof($f)) {
+    if (count($futures) > $limit) {
+        foreach ($futures as $future) {
+            $future_stations = $future->await();
+            foreach ($future_stations as $name => $future_station) {
+                if (isset($stations[$name])) {
+                    $station = &$stations[$name];
+                    $station['count'] += $future_station['count'];
+                    $station['total'] += $future_station['total'];
+                    if ($future_station['min'] < $station['min']) {
+                        $station['min'] = $future_station['min'];
+                    }
+                    if ($future_station['max'] > $station['max']) {
+                        $station['max'] = $future_station['max'];
+                    }
+                } else {
+                    $stations[$name] = $future_station;
+                }
+            }
+        }
+        $futures = [];
+    }
+
+    fseek($f, $pos);
+
+    $data = fread($f, 5242880);
+
+    $last_pos = strrpos($data, "\n");
+
+    if ($last_pos === false) {
+        $last_pos = strlen($data);
+    }
+
+    //$futures[] = $runtime->run($process_chunk, substr($data, 0, $last_pos));
+    $futures[] = async($process_chunk, substr($data, 0, $last_pos));
 
     $pos += $last_pos;
 }
