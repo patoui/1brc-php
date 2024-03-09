@@ -52,16 +52,17 @@ while (!feof($f)) {
                 'max' => -100,
             ];
         }
+        $station = &$stations[$name];
 
-        ++$stations[$name]['count'];
-        $stations[$name]['total'] += $temperature;
+        ++$station['count'];
+        $station['total'] += $temperature;
 
-        if ($temperature < $stations[$name]['min']) {
-            $stations[$name]['min'] = $temperature;
+        if ($temperature < $station['min']) {
+            $station['min'] = $temperature;
         }
 
-        if ($temperature > $stations[$name]['max']) {
-            $stations[$name]['max'] = $temperature;
+        if ($temperature > $station['max']) {
+            $station['max'] = $temperature;
         }
 
         // ++$c;
@@ -81,15 +82,15 @@ ksort($stations);
 
 $output = '{';
 
-foreach ($stations as $name => $data) {
+foreach ($stations as $name => $station) {
     $output .=
         $name .
         '=' .
-        $data['min'] .
+        $station['min'] .
         '/' .
-        sprintf('%.1f', $data['total'] / $data['count']) .
+        sprintf('%.1f', $station['total'] / $station['count']) .
         '/' .
-        $data['max'] . ', ';
+        $station['max'] . ', ';
 }
 
 echo rtrim($output, ', ') . '}';
