@@ -6,20 +6,17 @@ declare(strict_types=1);
  * Format:
  * key = station name
  * value = [
- *     'count' => 111,
- *     'total' => 189100,
- *     'min' => 1,
- *     'max' => 321,
+ *     0 => 111, // count
+ *     1 => 189100, // total
+ *     2 => 1, // min
+ *     3 => 321, // max
  * ]
  */
 $stations = [];
 
 // $c = 0;
 
-$input = __DIR__ . '/measurements.txt';
-// $input = __DIR__ . "/top1000000.txt";
-
-$f = fopen($input, 'r');
+$f = fopen(__DIR__ . '/measurements.txt', 'r');
 $pos = 0;
 
 while (!feof($f)) {
@@ -44,25 +41,25 @@ while (!feof($f)) {
 
         if (!isset($stations[$name])) {
             $stations[$name] = [
-                'count' => 0,
-                'total' => 0,
+                0 => 0,
+                1 => 0,
                 // max value of 99.99
-                'min' => 100,
+                2 => 100,
                 // min value of -99.99
-                'max' => -100,
+                3 => -100,
             ];
         }
         $station = &$stations[$name];
 
-        ++$station['count'];
-        $station['total'] += $temperature;
+        ++$station[0];
+        $station[1] += $temperature;
 
-        if ($temperature < $station['min']) {
-            $station['min'] = $temperature;
+        if ($temperature < $station[2]) {
+            $station[2] = $temperature;
         }
 
-        if ($temperature > $station['max']) {
-            $station['max'] = $temperature;
+        if ($temperature > $station[3]) {
+            $station[3] = $temperature;
         }
 
         // ++$c;
@@ -86,11 +83,11 @@ foreach ($stations as $name => $station) {
     $output .=
         $name .
         '=' .
-        $station['min'] .
+        $station[2] .
         '/' .
-        sprintf('%.1f', $station['total'] / $station['count']) .
+        sprintf('%.1f', $station[1] / $station[0]) .
         '/' .
-        $station['max'] . ', ';
+        $station[3] . ', ';
 }
 
 echo rtrim($output, ', ') . '}';
